@@ -1,0 +1,25 @@
+# Keil / MDK / STM32 build outputs
+*.axf
+*.bin
+*.hex
+*.elf
+*.map
+*.lst
+*.d
+*.crf
+*.o
+*.obj
+*.bak
+*.log
+*.tmp
+*.dep
+
+# ARM/Keil user-specific files
+*.uvguix.*
+*.uvoptx
+*.scvd
+
+# IDE / local environment
+.vscode/
+DebugConfig/
+RTE/_UniversalGimbal/*.bak

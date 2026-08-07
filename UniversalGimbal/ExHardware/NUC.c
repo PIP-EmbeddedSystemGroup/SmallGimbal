@@ -100,6 +100,8 @@ void NUC_SendConfig(float Q[4])
     CRC16_Append(NucTxBuf, 78, CRC16_CCITT);
 
     HAL_UART_Transmit_IT(&huart1, NucTxBuf, 80);
+    CDC_Transmit_FS(NucTxBuf, 80);
+
 }
 
 void NUC_RC_RxCallback(void)
