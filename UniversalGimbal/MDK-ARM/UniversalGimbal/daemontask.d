@@ -7,7 +7,7 @@ universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Include/core_cm4.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdint.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdint.h
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Include/cmsis_version.h
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -15,7 +15,7 @@ universalgimbal\daemontask.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 universalgimbal\daemontask.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stddef.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stddef.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
@@ -36,7 +36,7 @@ universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 universalgimbal\daemontask.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\math.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\math.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 universalgimbal\daemontask.o: ../Core/Inc/FreeRTOSConfig.h
@@ -52,9 +52,9 @@ universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/include
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 universalgimbal\daemontask.o: ../Middlewares/ST/ARM/DSP/Inc/arm_math.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\string.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\float.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\limits.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\string.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\float.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\limits.h
 universalgimbal\daemontask.o: ../../RobotConfig.h
 universalgimbal\daemontask.o: ../ExHardware/RC_DBUS.h
 universalgimbal\daemontask.o: ../ExHardware/RC_VTM.h
@@ -73,6 +73,7 @@ universalgimbal\daemontask.o: ../ExHardware/LKMotor.h
 universalgimbal\daemontask.o: ../Core/Inc/header.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\daemontask.o: ../ExHardware/LKMotor.h
+universalgimbal\daemontask.o: ../ExHardware/Dwt_Timer.h
 universalgimbal\daemontask.o: ../Core/Inc/usart.h
 universalgimbal\daemontask.o: ../Core/Inc/can.h
 universalgimbal\daemontask.o: ../Core/Inc/tim.h
@@ -80,8 +81,8 @@ universalgimbal\daemontask.o: ../Core/Inc/spi.h
 universalgimbal\daemontask.o: ../USB_DEVICE/App/usb_device.h
 universalgimbal\daemontask.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h
 universalgimbal\daemontask.o: ../USB_DEVICE/Target/usbd_conf.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdio.h
-universalgimbal\daemontask.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdlib.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdio.h
+universalgimbal\daemontask.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdlib.h
 universalgimbal\daemontask.o: ../USB_DEVICE/App/usbd_cdc_if.h
 universalgimbal\daemontask.o: ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h
 universalgimbal\daemontask.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h
@@ -103,9 +104,13 @@ universalgimbal\daemontask.o: ../Task/ControllerTask.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\daemontask.o: ../Task/VisionTask.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+universalgimbal\daemontask.o: ../Core/Inc/header.h
+universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+universalgimbal\daemontask.o: ../Task/ControllerTask.h
 universalgimbal\daemontask.o: ../Task/InertialTask.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\daemontask.o: ../Task/DebugTask.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\daemontask.o: ../Task/GimbalTask.h
 universalgimbal\daemontask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+universalgimbal\daemontask.o: ../Task/VisionTask.h

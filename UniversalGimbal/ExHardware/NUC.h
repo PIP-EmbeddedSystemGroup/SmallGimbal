@@ -8,11 +8,12 @@
 #include "stm32f4xx_hal.h"
 #include "stdint.h"
 
+extern DMA_HandleTypeDef hdma_usart1_rx;
+
 typedef enum
 {
     ANGLE_CONTROL = 0xB4,
     SPEED_CONTROL = 0xF3,
-    ANGLE_INCRESEMENT_CONTROL = 0xA8,
     FORCE_CONTROL = 0xC5
 } Yaw_PITCH_ControlMode_t;
 
@@ -23,13 +24,20 @@ typedef enum
     DETECTED_AND_LOCKED = 0xB0
 } VisonResult_t;
 
+
+typedef enum {
+    NUC_STATE_UNSYNC = 0,
+    NUC_STATE_SYNCING,
+    NUC_STATE_RUNNING
+} NUC_State_t;
+
 typedef struct
 {
     uint8_t Yaw_ControlMode;
-    float YawDataRecieve; // 接受的是degree，会转换成rad
+    float YawDataRecieve; // 接受的应该是度
 
     uint8_t Pitch_ControlMode;
-    float PitchDataRecieve; // 接受的是degree，会转换成rad
+    float PitchDataRecieve; 
 
     uint8_t VisonResult;
     uint8_t ShootingPremision;
@@ -80,13 +88,24 @@ typedef struct
 
     int ErrorCount;
     uint32_t LastOnlineTick;
+
+	NUC_State_t State;          // 当前状态
+    uint64_t LastRxTimeUs;      // 上次收到任意有效包时的本地微秒时间
+	
+	 uint64_t NUC_RXNUM;
+	uint64_t NUC_TXNUM;
+
+	
 } NUC_t;
 
+uint64_t NUC_GetClockUs(void);
 void NUC_Init(void);
 void NUC_SendConfig(float Q[4]);
-void NUC_RxCallback(int isFromUart);
-
-extern uint8_t NucRxBuf[64];
+void NUC_RxCallback(uint8_t *rxBuf, int rxSize);
+void NUC_TimeoutCheck(void);
+	
+extern uint8_t NucRxBuf[72];
+extern  uint8_t NucDmaBuf[128];
 extern NUC_t NUC;
 
 #endif

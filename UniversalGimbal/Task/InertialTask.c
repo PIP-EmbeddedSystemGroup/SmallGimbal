@@ -231,7 +231,6 @@ void InertialTask(void const *argument)
         Inertial.Roll = QEKF_INERTIAL.Roll;
         Inertial.YawTotalAngle = QEKF_INERTIAL.YawTotalAngle;
 
-        NUC_SendConfig(Inertial.Q);
     }
 }
 

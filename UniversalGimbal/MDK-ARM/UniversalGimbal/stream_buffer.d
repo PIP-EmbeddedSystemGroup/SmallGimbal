@@ -1,8 +1,8 @@
 universalgimbal\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c
-universalgimbal\stream_buffer.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdint.h
-universalgimbal\stream_buffer.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\string.h
+universalgimbal\stream_buffer.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdint.h
+universalgimbal\stream_buffer.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\string.h
 universalgimbal\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-universalgimbal\stream_buffer.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stddef.h
+universalgimbal\stream_buffer.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stddef.h
 universalgimbal\stream_buffer.o: ../Core/Inc/FreeRTOSConfig.h
 universalgimbal\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 universalgimbal\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

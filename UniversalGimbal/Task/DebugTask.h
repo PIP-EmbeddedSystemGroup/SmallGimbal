@@ -8,10 +8,17 @@
 #include "stdint.h"
 #include "cmsis_os.h"
 
-#define DEBUG_MODE_NORMAL   0
-#define DEBUG_MODE_FFT      1
-#define DEBUG_MODE      DEBUG_MODE_NORMAL    
+typedef struct 
+{
+    uint32_t Head;
+    float Value[6];
+    uint32_t Tail;
+
+    float TempValue[4];
+} DebugData_t;
 
 void DebugTask(void const * argument);
+
+extern volatile DebugData_t DebugData;
 
 #endif

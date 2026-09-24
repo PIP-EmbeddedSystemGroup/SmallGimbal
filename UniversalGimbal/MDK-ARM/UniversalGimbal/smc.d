@@ -1,8 +1,8 @@
 universalgimbal\smc.o: ..\UserLibrary\Smc.c
 universalgimbal\smc.o: ..\UserLibrary\smc.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdint.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\math.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\string.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdint.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\math.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\string.h
 universalgimbal\smc.o: ../Core/Inc/header.h
 universalgimbal\smc.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 universalgimbal\smc.o: ../Core/Inc/stm32f4xx_hal_conf.h
@@ -18,7 +18,7 @@ universalgimbal\smc.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 universalgimbal\smc.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 universalgimbal\smc.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 universalgimbal\smc.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stddef.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stddef.h
 universalgimbal\smc.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 universalgimbal\smc.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 universalgimbal\smc.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
@@ -54,8 +54,8 @@ universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 universalgimbal\smc.o: ../Middlewares/ST/ARM/DSP/Inc/arm_math.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\float.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\limits.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\float.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\limits.h
 universalgimbal\smc.o: ../../RobotConfig.h
 universalgimbal\smc.o: ../ExHardware/RC_DBUS.h
 universalgimbal\smc.o: ../ExHardware/RC_VTM.h
@@ -74,6 +74,7 @@ universalgimbal\smc.o: ../ExHardware/LKMotor.h
 universalgimbal\smc.o: ../Core/Inc/header.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\smc.o: ../ExHardware/LKMotor.h
+universalgimbal\smc.o: ../ExHardware/Dwt_Timer.h
 universalgimbal\smc.o: ../Core/Inc/usart.h
 universalgimbal\smc.o: ../Core/Inc/can.h
 universalgimbal\smc.o: ../Core/Inc/tim.h
@@ -81,8 +82,8 @@ universalgimbal\smc.o: ../Core/Inc/spi.h
 universalgimbal\smc.o: ../USB_DEVICE/App/usb_device.h
 universalgimbal\smc.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h
 universalgimbal\smc.o: ../USB_DEVICE/Target/usbd_conf.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdio.h
-universalgimbal\smc.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdlib.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdio.h
+universalgimbal\smc.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdlib.h
 universalgimbal\smc.o: ../USB_DEVICE/App/usbd_cdc_if.h
 universalgimbal\smc.o: ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h
 universalgimbal\smc.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h
@@ -103,9 +104,13 @@ universalgimbal\smc.o: ../Task/ControllerTask.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\smc.o: ../Task/VisionTask.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+universalgimbal\smc.o: ../Core/Inc/header.h
+universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+universalgimbal\smc.o: ../Task/ControllerTask.h
 universalgimbal\smc.o: ../Task/InertialTask.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\smc.o: ../Task/DebugTask.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\smc.o: ../Task/GimbalTask.h
 universalgimbal\smc.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+universalgimbal\smc.o: ../Task/VisionTask.h

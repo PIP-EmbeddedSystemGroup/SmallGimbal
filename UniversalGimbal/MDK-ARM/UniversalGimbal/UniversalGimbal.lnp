@@ -53,6 +53,7 @@
 "universalgimbal\misc.o"
 "universalgimbal\referee.o"
 "universalgimbal\lkmotor.o"
+"universalgimbal\dwt_timer.o"
 "universalgimbal\bmi088driver.o"
 "universalgimbal\bmi088middleware.o"
 "universalgimbal\croutine.o"
@@ -78,8 +79,8 @@
 "universalgimbal\mousekeyboard.o"
 "universalgimbal\fusionkf.o"
 "universalgimbal\smc.o"
-"../Middlewares/ST/ARM/DSP/Lib/arm_cortexM4l_math.lib"
-"../Middlewares/ST/ARM/DSP/Lib/arm_cortexM4lf_math.lib"
+"..\Middlewares\ST\ARM\DSP\Lib\arm_cortexM4l_math.lib"
+"..\Middlewares\ST\ARM\DSP\Lib\arm_cortexM4lf_math.lib"
 --strict --scatter "UniversalGimbal\UniversalGimbal.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

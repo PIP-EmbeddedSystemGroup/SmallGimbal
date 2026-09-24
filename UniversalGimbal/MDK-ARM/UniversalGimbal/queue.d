@@ -1,9 +1,9 @@
 universalgimbal\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/queue.c
-universalgimbal\queue.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdlib.h
-universalgimbal\queue.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\string.h
+universalgimbal\queue.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdlib.h
+universalgimbal\queue.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\string.h
 universalgimbal\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-universalgimbal\queue.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stddef.h
-universalgimbal\queue.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdint.h
+universalgimbal\queue.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stddef.h
+universalgimbal\queue.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdint.h
 universalgimbal\queue.o: ../Core/Inc/FreeRTOSConfig.h
 universalgimbal\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 universalgimbal\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

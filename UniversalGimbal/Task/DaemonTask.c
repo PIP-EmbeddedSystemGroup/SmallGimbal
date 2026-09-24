@@ -54,17 +54,9 @@ void DaemonTask(void const *argument)
         Daemon.CpuUsage = 100.f - (IdleCounter / 1000000.f / 0.1f * 100.f); // 1000000是定时器频率 0.1是统计周期 100是百分比
         IdleCounter = 0;
 
+				//判断是否需要切换NUC的
+				NUC_TimeoutCheck();
         uint32_t NowTick = HAL_GetTick();
 
-        // ChassisBoard_SendError(); // 将底盘错误标志同步到云台
-        // ChassisBoard_SendState();
-
-        // // 遥控器掉线超过1秒 且未处于电脑控制模式或图传链路也掉线时 重启程序
-        // if (NowTick - RC_DBUS.LastOnlineTick > 1000 && NowTick - RC_VTM.LastOnlineTick > 1000)
-        //     if (RC_VTM.Pad.Switch != RC_VTM_Switch_COMPUTER_CTRL && RC_DBUS.Pad.S2 != RC_DBUS_S2_COMPUTER_CTRL)
-        //         HAL_NVIC_SystemReset();
-
-        // if (RC_DBUS.Pad.CH0 < 364 || RC_DBUS.Pad.CH0 > 1684 || RC_DBUS.Pad.CH1 < 364 || RC_DBUS.Pad.CH1 > 1684)
-        //     HAL_NVIC_SystemReset();
     }
 }

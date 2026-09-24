@@ -266,5 +266,15 @@ __weak void ControllerTask(void const * argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
+/**
+ * @brief ���ڼ�� NUC ���ݳ�ʱ����
+ */
+void NucTimeoutTask(void const * argument)
+{
+    while (1)
+    {
+        NUC_TimeoutCheck();
+        osDelay(10);   // 10ms ���ڵ���һ��
+    }
+}
 /* USER CODE END Application */

@@ -1,9 +1,9 @@
 universalgimbal\cmsis_os.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c
-universalgimbal\cmsis_os.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\string.h
+universalgimbal\cmsis_os.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\string.h
 universalgimbal\cmsis_os.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 universalgimbal\cmsis_os.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-universalgimbal\cmsis_os.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stddef.h
-universalgimbal\cmsis_os.o: D:\keil 5.36\ARM\ARMCC\Bin\..\include\stdint.h
+universalgimbal\cmsis_os.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stddef.h
+universalgimbal\cmsis_os.o: D:\keil_5.41\ARM\arm-compiler-5.06-update\Bin\..\include\stdint.h
 universalgimbal\cmsis_os.o: ../Core/Inc/FreeRTOSConfig.h
 universalgimbal\cmsis_os.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 universalgimbal\cmsis_os.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

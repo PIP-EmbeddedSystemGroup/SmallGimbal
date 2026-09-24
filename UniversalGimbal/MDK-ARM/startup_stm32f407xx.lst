@@ -850,10 +850,10 @@ ARM Macro Assembler    Page 14
 
 
 tup_stm32f407xx.o -I../Core/Inc -I../Drivers/CMSIS/Include -I../Middlewares/ST/
-ARM/DSP/Inc -I.\RTE\_UniversalGimbal -I"D:\keil 5.36\packs\ARM\CMSIS\5.8.0\CMSI
-S\Core\Include" --predefine="__UVISION_VERSION SETA 536" --predefine="_RTE_ SET
-A 1" --predefine="STM32F407xx SETA 1" --predefine="_RTE_ SETA 1" --list=startup
-_stm32f407xx.lst startup_stm32f407xx.s
+ARM/DSP/Inc -I.\RTE\_UniversalGimbal -ID:\keil_5.41\ARM\CMSIS\6.1.0\CMSIS\Core\
+Include --predefine="__UVISION_VERSION SETA 541" --predefine="STM32F407xx SETA 
+1" --predefine="_RTE_ SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407x
+x.s
 
 
 
