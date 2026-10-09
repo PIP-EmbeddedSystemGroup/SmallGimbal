@@ -94,7 +94,7 @@ typedef struct
 	
 	 uint64_t NUC_RXNUM;
 	uint64_t NUC_TXNUM;
-
+	volatile uint8_t NucRxNeedRestart;		// NUC 串口异常标志位
 	
 } NUC_t;
 

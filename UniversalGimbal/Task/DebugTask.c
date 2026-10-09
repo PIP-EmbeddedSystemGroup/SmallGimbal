@@ -24,6 +24,8 @@ void DebugTask(void const *argument)
     {
         uint32_t NowTick = HAL_GetTick();
         osDelayUntil(&PreviousWakeTime, DEBUG_TASK_UPDATE_TICK);
+				DebugData.Value[0] = USART1->SR;
+				
                 
                   
         HAL_UART_Transmit_DMA(&huart6, (uint8_t *)&DebugData, sizeof(DebugData));

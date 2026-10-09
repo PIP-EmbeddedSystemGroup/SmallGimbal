@@ -399,5 +399,19 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 	if(huart->Instance == USART1)
 		NUC_RxCallback(NucDmaBuf,Size);
 }
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART1)
+    {
+				// clear the errorcode by read SR and DR
+        volatile uint32_t tmp;
+        tmp = huart->Instance->SR;
+        tmp = huart->Instance->DR;
+        (void)tmp;
+				NUC.NucRxNeedRestart = 1;
+        NUC.State = NUC_STATE_UNSYNC;
+    }
+}
 /* USER CODE END 1 */
 

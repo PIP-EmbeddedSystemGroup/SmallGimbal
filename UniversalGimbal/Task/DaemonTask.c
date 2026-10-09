@@ -57,6 +57,15 @@ void DaemonTask(void const *argument)
 				//判断是否需要切换NUC的
 				NUC_TimeoutCheck();
         uint32_t NowTick = HAL_GetTick();
+			
+			if (NUC.NucRxNeedRestart || huart1.RxState != HAL_UART_STATE_BUSY_RX)
+			{
+					NUC.NucRxNeedRestart = 0;
+					HAL_UART_AbortReceive(&huart1);                 // 关闭 RX 中断 / 停止 DMA
+					__HAL_UART_CLEAR_PEFLAG(&huart1);               // 清 PE/FE/NE/ORE/IDLE 
+					if (HAL_UARTEx_ReceiveToIdle_DMA(&huart1, NucDmaBuf, sizeof(NucDmaBuf)) == HAL_OK)
+							__HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+			}
 
     }
 }
