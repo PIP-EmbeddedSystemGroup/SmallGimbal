@@ -225,11 +225,13 @@ void InertialTask(void const *argument)
             LPF_1stOrderIIR_Update(&Inertial.dGyroLPF[i], Inertial.dGyro[i]);
         }
 
+				
+			 NUC_SendConfig(Inertial.Q,Inertial.Q,0,0);
         // 获取最终数据
-        Inertial.Yaw = QEKF_INERTIAL.Yaw;
-        Inertial.Pitch = QEKF_INERTIAL.Pitch;
-        Inertial.Roll = QEKF_INERTIAL.Roll;
-        Inertial.YawTotalAngle = QEKF_INERTIAL.YawTotalAngle;
+       Inertial.Yaw = QEKF_INERTIAL.Yaw;
+       Inertial.Pitch = QEKF_INERTIAL.Pitch;
+       Inertial.Roll = QEKF_INERTIAL.Roll;
+       Inertial.YawTotalAngle = QEKF_INERTIAL.YawTotalAngle;
 
     }
 }

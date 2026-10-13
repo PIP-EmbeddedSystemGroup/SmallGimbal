@@ -21,25 +21,8 @@ void VisionTask(void const *argument)
     Vision.VisionMode = VISION_MODE_ARMOR;
     Vision.DecisionMode = DECISION_MODE_AOTU;
 
- while (1)
-{
-    osSignalWait(0x0001, osWaitForever);
-
-    if (Controller.AimingOn && NUC.Pitch_ControlMode == ANGLE_CONTROL)
-    {
-        Controller.View.Pitch = Vision.NUC->PitchDataRecieve;
-    }
-    if (Controller.AimingOn && NUC.Yaw_ControlMode == ANGLE_CONTROL)
-    {
-        Controller.View.Yaw = Vision.NUC->YawDataRecieve;
-    }
-//    if (Controller.AimingOn && NUC.Pitch_ControlMode == ANGLE_INCRESEMENT_CONTROL)
-//    {
-//        Controller.View.Pitch = Vision.NUC->PitchDataRecieve + Inertial.Pitch;
-//    }
-//    if (Controller.AimingOn && NUC.Yaw_ControlMode == ANGLE_INCRESEMENT_CONTROL)
-//    {
-//        Controller.View.Yaw = Vision.NUC->YawDataRecieve + Inertial.Yaw;
-//    }
-}
+	while (1)
+	{
+			osSignalWait(0x0001, osWaitForever);
+	}
 }

@@ -87,7 +87,6 @@ void GimbalTask(void const *argument)
         Gimbal.Yaw.Motor.Current.Set = Gimbal.Yaw.SpeedPID.Output;
         Gimbal.Pitch.Motor.Current.Set = -Gimbal.Pitch.SpeedPID.Output;
          DjiMotor_CanID_0x1FF_Output();
-        // DjiMotor_CanID_0x2FF_Output();
     }
 }
 
@@ -95,9 +94,17 @@ void GimbalTask(void const *argument)
 /// @param
 void Gimbal_YawPID_Calc(void)
 {
-    PID_AngleCalc(&Gimbal.Yaw.PositionPID, Inertial.Yaw, Controller.View.Yaw);
-    float SpeedSet = Gimbal.Yaw.PositionPID.Output;
-    PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], SpeedSet);
+		if(NUC.YawPosValid && !NUC.YawVelValid && !NUC.YawAccValid)
+		{
+				PID_AngleCalc(&Gimbal.Yaw.PositionPID, Inertial.Yaw, NUC.YawAngle);
+				float SpeedSet = Gimbal.Yaw.PositionPID.Output;
+				PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], SpeedSet);
+		}
+		else if(NUC.YawVelValid && !NUC.YawPosValid && !NUC.YawAccValid)
+		{
+			PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], NUC.YawVelocity * 0.0175f);
+		}
+
 }
 
 /// @brief 计算Pitch轴PID 根据Pitch轴电机编码器 计算超出限幅的角度大小 并检测云台目标角度是否会超出限幅
@@ -107,30 +114,39 @@ void Gimbal_PitchPID_CalcWithConstrain(void)
     const int PitchTopEnc = PITCH_MAX_ENCODER;
     const int PitchBottomEnc = PITCH_MIN_ENCODER; // 云台上抬对应编码器数值增大
 
-    // 下列定义永远对应上抬增大的结果
-    // 与目标的差
-    float ErrAngle = AngleDiffF(Controller.View.Pitch, Inertial.Pitch, Gimbal.Pitch.PositionPID.CircleResolution);
-    // 与限幅的差
-    int TopDeltaEnc, BottomDeltaEnc;
-    if (AngleDiffF(PitchTopEnc, PitchBottomEnc, Gimbal.Pitch.Motor.EncoderResolution) > 0) // 云台上抬对应编码器数值增大
-    {
-        TopDeltaEnc = AngleDiffF(PitchTopEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
-        BottomDeltaEnc = AngleDiffF(PitchBottomEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
-    }
-    else // 云台上抬对应编码器数值减小
-    {
-        TopDeltaEnc = -AngleDiffF(PitchTopEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
-        BottomDeltaEnc = -AngleDiffF(PitchBottomEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
-    }
-    float TopDeltaAngle = TopDeltaEnc * 360.f / Gimbal.Pitch.Motor.EncoderResolution;
-    float BottomDeltaAngle = BottomDeltaEnc * 360.f / Gimbal.Pitch.Motor.EncoderResolution;
-    if (ErrAngle > TopDeltaAngle)
-        Controller.View.Pitch = Controller.View.Pitch - ErrAngle + TopDeltaAngle;
-    else if (ErrAngle < BottomDeltaAngle)
-        Controller.View.Pitch = Controller.View.Pitch - ErrAngle + BottomDeltaAngle;
+		if(NUC.PitchPosValid && !NUC.PitchVelValid && !NUC.PitchAccValid)
+		{
+			 Controller.View.Pitch = NUC.PitchAngle;
+		  // 下列定义永远对应上抬增大的结果
+			// 与目标的差
+			float ErrAngle = AngleDiffF(Controller.View.Pitch, Inertial.Pitch, Gimbal.Pitch.PositionPID.CircleResolution);
+			// 与限幅的差
+			int TopDeltaEnc, BottomDeltaEnc;
+			if (AngleDiffF(PitchTopEnc, PitchBottomEnc, Gimbal.Pitch.Motor.EncoderResolution) > 0) // 云台上抬对应编码器数值增大
+			{
+					TopDeltaEnc = AngleDiffF(PitchTopEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
+					BottomDeltaEnc = AngleDiffF(PitchBottomEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
+			}
+			else // 云台上抬对应编码器数值减小
+			{
+					TopDeltaEnc = -AngleDiffF(PitchTopEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
+					BottomDeltaEnc = -AngleDiffF(PitchBottomEnc, Gimbal.Pitch.Motor.Position.Real, Gimbal.Pitch.Motor.EncoderResolution);
+			}
+			float TopDeltaAngle = TopDeltaEnc * 360.f / Gimbal.Pitch.Motor.EncoderResolution;
+			float BottomDeltaAngle = BottomDeltaEnc * 360.f / Gimbal.Pitch.Motor.EncoderResolution;
+			if (ErrAngle > TopDeltaAngle)
+					Controller.View.Pitch = Controller.View.Pitch - ErrAngle + TopDeltaAngle;
+			else if (ErrAngle < BottomDeltaAngle)
+					Controller.View.Pitch = Controller.View.Pitch - ErrAngle + BottomDeltaAngle;
 
-    PID_AngleCalc(&Gimbal.Pitch.PositionPID, Inertial.Pitch, Controller.View.Pitch);
-    PID_Calc(&Gimbal.Pitch.SpeedPID, Inertial.Gyro[AX], Gimbal.Pitch.PositionPID.Output);
+			PID_AngleCalc(&Gimbal.Pitch.PositionPID, Inertial.Pitch, Controller.View.Pitch);
+			PID_Calc(&Gimbal.Pitch.SpeedPID, Inertial.Gyro[AX], Gimbal.Pitch.PositionPID.Output);
+		}
+		else if(NUC.PitchVelValid && !NUC.PitchPosValid && !NUC.PitchAccValid)
+		{
+			PID_Calc(&Gimbal.Pitch.SpeedPID, Inertial.Gyro[AX], NUC.PitchVelocity * 0.0175f);
+		}
+   
 }
 
 void Gimbal_Disable(void)

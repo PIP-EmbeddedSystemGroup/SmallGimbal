@@ -53,9 +53,6 @@ osStaticThreadDef_t DaemonControlBlock;
 osThreadId GimbalHandle;
 uint32_t GimbalBuffer[ 128 ];
 osStaticThreadDef_t GimbalControlBlock;
-osThreadId VisionHandle;
-uint32_t VisionBuffer[ 512 ];
-osStaticThreadDef_t VisionControlBlock;
 osThreadId InertialHandle;
 uint32_t InertialBuffer[ 1024 ];
 osStaticThreadDef_t InertialControlBlock;
@@ -65,6 +62,9 @@ osStaticThreadDef_t DebugTaskControlBlock;
 osThreadId ControllerHandle;
 uint32_t ControllerBuffer[ 128 ];
 osStaticThreadDef_t ControllerControlBlock;
+osThreadId VisionHandle;
+uint32_t VisionBuffer[ 512 ];
+osStaticThreadDef_t VisionControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -73,10 +73,10 @@ osStaticThreadDef_t ControllerControlBlock;
 
 void DaemonTask(void const * argument);
 void GimbalTask(void const * argument);
-void VisionTask(void const * argument);
 void InertialTask(void const * argument);
 void DebugTask(void const * argument);
 void ControllerTask(void const * argument);
+void VisionTask(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -132,10 +132,6 @@ void MX_FREERTOS_Init(void) {
   osThreadStaticDef(Gimbal, GimbalTask, osPriorityNormal, 0, 128, GimbalBuffer, &GimbalControlBlock);
   GimbalHandle = osThreadCreate(osThread(Gimbal), NULL);
 
-  /* definition and creation of Vision */
-  osThreadStaticDef(Vision, VisionTask, osPriorityNormal, 0, 512, VisionBuffer, &VisionControlBlock);
-  VisionHandle = osThreadCreate(osThread(Vision), NULL);
-
   /* definition and creation of Inertial */
   osThreadStaticDef(Inertial, InertialTask, osPriorityHigh, 0, 1024, InertialBuffer, &InertialControlBlock);
   InertialHandle = osThreadCreate(osThread(Inertial), NULL);
@@ -147,6 +143,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of Controller */
   osThreadStaticDef(Controller, ControllerTask, osPriorityHigh, 0, 128, ControllerBuffer, &ControllerControlBlock);
   ControllerHandle = osThreadCreate(osThread(Controller), NULL);
+
+  /* definition and creation of Vision */
+  osThreadStaticDef(Vision, VisionTask, osPriorityNormal, 0, 512, VisionBuffer, &VisionControlBlock);
+  VisionHandle = osThreadCreate(osThread(Vision), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -190,24 +190,6 @@ __weak void GimbalTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END GimbalTask */
-}
-
-/* USER CODE BEGIN Header_VisionTask */
-/**
-* @brief Function implementing the Vision thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_VisionTask */
-__weak void VisionTask(void const * argument)
-{
-  /* USER CODE BEGIN VisionTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END VisionTask */
 }
 
 /* USER CODE BEGIN Header_InertialTask */
@@ -262,6 +244,24 @@ __weak void ControllerTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END ControllerTask */
+}
+
+/* USER CODE BEGIN Header_VisionTask */
+/**
+* @brief Function implementing the Vision thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_VisionTask */
+__weak void VisionTask(void const * argument)
+{
+  /* USER CODE BEGIN VisionTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END VisionTask */
 }
 
 /* Private application code --------------------------------------------------*/
