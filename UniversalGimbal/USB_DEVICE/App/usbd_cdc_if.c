@@ -261,8 +261,12 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  memcpy(NucRxBuf, Buf, sizeof(NucRxBuf));
-  NUC_RxCallback(NucRxBuf,sizeof(NucRxBuf));
+  uint32_t rx_len = *Len;
+  if (rx_len > sizeof(NucUsbRxBuf))
+    rx_len = sizeof(NucUsbRxBuf);
+
+  memcpy(NucUsbRxBuf, Buf, rx_len);
+  NUC_RxCallback(NucUsbRxBuf, (int)rx_len);
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);

@@ -23,8 +23,7 @@ void DebugTask(void const *argument)
     while (1)
     {
         uint32_t NowTick = HAL_GetTick();
-        osDelayUntil(&PreviousWakeTime, DEBUG_TASK_UPDATE_TICK);
-				DebugData.Value[0] = USART1->SR;
+        osDelayUntil(&PreviousWakeTime, DEBUG_TASK_UPDATE_TICK);	
 				
                 
                   

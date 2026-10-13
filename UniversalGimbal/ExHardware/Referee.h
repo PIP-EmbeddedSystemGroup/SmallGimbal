@@ -11,6 +11,7 @@
 typedef struct
 {
     int PackageCount;   //接收到的数据包数量
+    int StickyCount;    //粘包数量
     int ErrorCount;     //错误数据计数
     uint32_t LastOnlineTick;
 
@@ -37,36 +38,20 @@ typedef struct
 
     __packed struct
     {
-        uint16_t Red1RobotHP;
-        uint16_t Red2RobotHP;
-        uint16_t Red3RobotHP;
-        uint16_t Red4RobotHP;
-        uint16_t Red5RobotHP;
-        uint16_t Red7RobotHP;
-        uint16_t RedOutpostHP;
-        uint16_t RedBaseHP;
-        uint16_t Blue1RobotHP;
-        uint16_t Blue2RobotHP;
-        uint16_t Blue3RobotHP;
-        uint16_t Blue4RobotHP;
-        uint16_t Blue5RobotHP;
-        uint16_t Blue7RobotHP;
-        uint16_t BlueOutpostHP;
-        uint16_t BlueBaseHP;
+        uint16_t ally_1_robot_HP; 
+        uint16_t ally_2_robot_HP; 
+        uint16_t ally_3_robot_HP; 
+        uint16_t ally_4_robot_HP; 
+        uint16_t reserved; 
+        uint16_t ally_7_robot_HP; 
+        uint16_t ally_outpost_HP; 
+        uint16_t ally_base_HP;
     } GameRobotHP;
 
     __packed struct
     {
         uint32_t EventData;
     } EventData;
-
-    __packed struct
-    {
-        uint8_t Reserved;
-        uint8_t SupplyRobotId;
-        uint8_t SupplyProjectileStep;
-        uint8_t SupplyProjectileNum;
-    } ExtSupplyProjectileAction;
 
     __packed struct
     {
@@ -97,12 +82,11 @@ typedef struct
 
     __packed struct
     {
-        uint16_t ChassisVoltage;
-        uint16_t ChassisCurrent;
-        float ChassisPower;
+        uint16_t reserved;
+        uint16_t reserved1;
+        float reserved2;
         uint16_t BufferEnergy;
         uint16_t Shooter17mm1BarrelHeat;
-        uint16_t Shooter17mm2BarrelHeat;
         uint16_t Shooter42mmBarrelHeat;
     } PowerHeatData;
 
@@ -120,17 +104,12 @@ typedef struct
         uint8_t DefenceBuff;
         uint8_t VulnerabilityBuff;
         uint16_t AttackBuff;
+        uint8_t RemainingEnergy;
     } Buff;
 
     __packed struct
     {
-        uint8_t AirforceStatus;
-        uint8_t TimeRemain;
-    } AirSupportData;
-
-    __packed struct
-    {
-        uint8_t ArmorId : 4;        //0 1 2 3 逆时针
+        uint8_t ArmorId : 4;
         uint8_t HPDeductionReason : 4;
     } HurtData;
 
@@ -147,11 +126,13 @@ typedef struct
         uint16_t ProjectileAllowance17mm;
         uint16_t ProjectileAllowance42mm;
         uint16_t RemainingGoldCoin;
+        uint16_t ProjectileAllowanceFortress;
     } ProjectileAllowance;
 
     __packed struct
     {
         uint32_t RfidStatus;
+        uint8_t RfidStatus2;
     } RfidStatus;
 
     __packed struct
@@ -172,18 +153,13 @@ typedef struct
         float Standard3Y;
         float Standard4X;
         float Standard4Y;
-        float Standard5X;
-        float Standard5Y;
+        float  reserved;
+        float  reserved1;
     } GroundRobotPosition;
 
     __packed struct
     {
-        uint8_t MarkHeroProgress;
-        uint8_t MarkEngineerProgress;
-        uint8_t MarkStandard3Progress;
-        uint8_t MarkStandard4Progress;
-        uint8_t MarkStandard5Progress;
-        uint8_t MarkSentryProgress;
+        uint16_t MarkProgress;
     } RadarMarkData;
 
     __packed struct
@@ -215,10 +191,11 @@ typedef struct
     } MapCommand;
 } Referee_t;
 
-void Referee_RxCallback_Parsing(uint8_t *rxBuf, int frameLen);
-void Referee_Set(void);
+void Referee_Init(void);
+void Referee_RxCallback(uint8_t* rxBuf, int rxSize);
 
 extern uint8_t RefereeRxBuf[192];
 extern Referee_t Referee;
 
 #endif
+

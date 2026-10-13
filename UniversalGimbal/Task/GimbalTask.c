@@ -12,10 +12,13 @@
 #define GIMBAL_TASK_UPDATE_TICK 1
 
 Gimbal_t Gimbal;
+PID_t Gimbal_Yaw_Speed_Only;
+PID_t Gimbal_Pitch_Speed_Only;
 
 void Gimbal_YawPID_Calc(void);
 void Gimbal_PitchPID_CalcWithConstrain(void);
 void Gimbal_Disable(void);
+float Gimbal_SpeedModeCalConstrain(float currentAngle, float targetSpeed,float topAngle, float bottomAngle, float circleResolution,float nearThreshold,float maxSpeed,float speedGain);
 
 void GimbalTask(void const *argument)
 {
@@ -69,6 +72,26 @@ void GimbalTask(void const *argument)
     PID_InitParam.DeadBand = 0;
     PID_InitParam.IntegralBand = 10;
     PID_Init(&Gimbal.Pitch.SpeedPID, &PID_InitParam);
+		
+		PID_InitParam.kP = 25;
+    PID_InitParam.kI = 500;
+    PID_InitParam.kD = 0;
+    PID_InitParam.MaxError = 2000;
+    PID_InitParam.MaxOutput = 15000;
+    PID_InitParam.I_Max = 2000;
+    PID_InitParam.DeadBand = 0;
+    PID_InitParam.IntegralBand = FLOAT_MAX_VAL;
+    PID_Init(&Gimbal_Pitch_Speed_Only, &PID_InitParam);
+		
+		PID_InitParam.kP = 75;
+    PID_InitParam.kI = 400;
+    PID_InitParam.kD = 0;
+    PID_InitParam.MaxError = 2000;
+    PID_InitParam.MaxOutput = 15000;
+    PID_InitParam.I_Max = 2000;
+    PID_InitParam.DeadBand = 0;
+    PID_InitParam.IntegralBand = FLOAT_MAX_VAL;
+    PID_Init(&Gimbal_Yaw_Speed_Only, &PID_InitParam);
 
     osDelay(1000);
 
@@ -84,9 +107,7 @@ void GimbalTask(void const *argument)
 
         Gimbal_YawPID_Calc();
         Gimbal_PitchPID_CalcWithConstrain();
-        Gimbal.Yaw.Motor.Current.Set = Gimbal.Yaw.SpeedPID.Output;
-        Gimbal.Pitch.Motor.Current.Set = -Gimbal.Pitch.SpeedPID.Output;
-         DjiMotor_CanID_0x1FF_Output();
+        DjiMotor_CanID_0x1FF_Output();
     }
 }
 
@@ -99,10 +120,12 @@ void Gimbal_YawPID_Calc(void)
 				PID_AngleCalc(&Gimbal.Yaw.PositionPID, Inertial.Yaw, NUC.YawAngle);
 				float SpeedSet = Gimbal.Yaw.PositionPID.Output;
 				PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], SpeedSet);
+			  Gimbal.Yaw.Motor.Current.Set = Gimbal.Yaw.SpeedPID.Output;
 		}
 		else if(NUC.YawVelValid && !NUC.YawPosValid && !NUC.YawAccValid)
 		{
-			PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], NUC.YawVelocity * 0.0175f);
+			PID_Calc(&Gimbal_Yaw_Speed_Only, Inertial.Gyro[AZ] * 57.295779513f, NUC.YawVelocity);
+			Gimbal.Yaw.Motor.Current.Set = Gimbal_Yaw_Speed_Only.Output;
 		}
 
 }
@@ -141,10 +164,22 @@ void Gimbal_PitchPID_CalcWithConstrain(void)
 
 			PID_AngleCalc(&Gimbal.Pitch.PositionPID, Inertial.Pitch, Controller.View.Pitch);
 			PID_Calc(&Gimbal.Pitch.SpeedPID, Inertial.Gyro[AX], Gimbal.Pitch.PositionPID.Output);
+			Gimbal.Pitch.Motor.Current.Set = -Gimbal.Pitch.SpeedPID.Output;
 		}
 		else if(NUC.PitchVelValid && !NUC.PitchPosValid && !NUC.PitchAccValid)
 		{
-			PID_Calc(&Gimbal.Pitch.SpeedPID, Inertial.Gyro[AX], NUC.PitchVelocity * 0.0175f);
+			float Gimbal_Pitch_Speed_Set = Gimbal_SpeedModeCalConstrain(Gimbal.Pitch.Motor.Position.Real,
+																												NUC.PitchVelocity,
+																												PitchTopEnc,
+																												PitchBottomEnc,
+																												Gimbal.Pitch.Motor.EncoderResolution,
+																												100,
+																												100,
+																												10);
+			
+			DebugData.Value[4] = Gimbal_Pitch_Speed_Set;
+			PID_Calc(&Gimbal_Pitch_Speed_Only, Inertial.Gyro[AX] * 57.295779513f, Gimbal_Pitch_Speed_Set);
+			Gimbal.Pitch.Motor.Current.Set = -Gimbal_Pitch_Speed_Only.Output;
 		}
    
 }
@@ -161,4 +196,49 @@ void Gimbal_Disable(void)
     PID_Clear(&Gimbal.Pitch.SpeedPID);
     PID_Clear(&Gimbal.Yaw.PositionPID);
     PID_Clear(&Gimbal.Yaw.SpeedPID);
+}
+
+/**
+ * @brief 速度控制模式下的限速计算
+ * @param currentAngle 当前编码值
+ * @param targetSpeed 目标速度
+ * @param topAngle 上限编码值
+ * @param bottomAngle 下限编码值
+ * @param circleResolution 一圈对应的编码值
+ * @param nearThreshold 接近限位的编码值
+ * @param maxSpeed 最大允许速度
+ * @param speedGain 速度限制增益（速度/角度差）
+ * @return 限制后的速度
+ */
+float Gimbal_SpeedModeCalConstrain(
+    float currentAngle, 
+    float targetSpeed,
+    float topAngle, 
+    float bottomAngle, 
+    float circleResolution,
+    float nearThreshold,
+    float maxSpeed,
+    float speedGain)
+{
+    float speedMax=maxSpeed;
+    float speedMin=-maxSpeed;
+    if(fabs(AngleDiffF(currentAngle, topAngle,circleResolution))<nearThreshold)
+    {
+        speedMax/=speedGain;
+				if(fabs(AngleDiffF(currentAngle, topAngle,circleResolution))<50)
+				{
+					speedMax=0;
+				}		
+    }
+    if(fabs(AngleDiffF(currentAngle, bottomAngle,circleResolution))<nearThreshold)
+    {
+        speedMin/=speedGain;
+				if(fabs(AngleDiffF(currentAngle, bottomAngle,circleResolution))<50)
+				{
+					speedMin=0;
+				}
+    }				
+		DebugData.Value[0]=speedMax;
+		DebugData.Value[1]= speedMin;
+    return ConstrainF(targetSpeed,speedMax,speedMin);
 }

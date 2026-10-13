@@ -2,15 +2,15 @@
  * @attention   采用UTF-8字符集编码
  * @brief       NUC数据收发
  * @authors     北工大PIP战队 刘诗厚
- * @version     v5.2
- * @date        2026-10-11
- * @details     已适配《PIP2027赛季上下位机通信协议 v5.2》
- *              - 3.1 上位机 -> 下位机：72 -> 67 字节
- *              - 3.2 下位机 -> 上位机：88 -> 80 字节
- *              - 云台/火控/底盘控制改为位域标志位，位置/速度/加速度拆成独立字段
- *              - 键鼠输入块 27~36 -> 40~49
- *              - 上行帧删除“云台大 Yaw 四元数”“车辆 z 方向速度”与保留字节，
- *                新增云台 Yaw/Pitch 角速度、自身/基地/前哨站血量、剩余发弹量
+ * @version     v5.3
+ * @date        2026-10-13
+ * @details     已适配《PIP2027赛季上下位机通信协议 v5.3》
+ *              - 删除时钟域同步机制，业务帧不再收发 uint64 发送时刻时间戳
+ *              - 3.1 上位机 -> 下位机：67 -> 59 字节（删除原字节 4~11）
+ *              - 3.2 下位机 -> 上位机：80 -> 72 字节（删除原字节 4~11）
+ *              - 因删除 8 字节时间戳，收/发两侧所有 >= 4 的字节偏移整体 -8
+ *              - 自瞄工作模式新增 0b0101 全自动工作模式
+ *              - 时间戳同步帧（2.1）格式不变，收到后进入 SYNCING，收到业务帧才进入 RUNNING
  *              键位的提取上做了修改，上位机把所有的键位发送出来了,留出调试空间？而且上位机把鼠标的控制和云台自瞄耦合在一起了，所以下位机还需要做特化处理
  */
 
@@ -55,7 +55,10 @@ uint8_t NucTxBuf[NUC_TX_PACKAGE_LENGTH] = {0};
 uint8_t tx_buf[NUC_SYNC_PACKAGE_LENGTH];
 
 //DMA接收临时缓冲区
-uint8_t NucDmaBuf[68] = {0};
+uint8_t NucDmaBuf[NUC_DMA_BUF_SIZE] = {0};
+
+//USB CDC 接收转发缓冲区
+uint8_t NucUsbRxBuf[NUC_USB_BUF_SIZE] = {0};
 
 NUC_t NUC;
 
@@ -103,17 +106,12 @@ void NUC_Init(void)
 }
 
 
-/**
- * @brief 处理时间同步包 Package-A，并发送回包 Package-B
- * @note  该帧格式在 v5.1 / v5.2 中完全一致，未做改动
- */
+/// @brief 处理时间同步包 Package-A，并发送回包 Package-B
 static void NUC_SyncPacketHandler(void)
 {
 
-    /* 获取本地微秒时间 */
     uint64_t mcu_clock_us =DWT_GetTimeline_us();
 
-    // 回包
     memcpy(tx_buf, NucSyncRxBuf, NUC_SYNC_PACKAGE_LENGTH);
     memcpy(&tx_buf[10], &mcu_clock_us, sizeof(uint64_t));
   
@@ -121,122 +119,93 @@ static void NUC_SyncPacketHandler(void)
 	
 		HAL_UART_Transmit_DMA(&huart1, tx_buf, NUC_SYNC_PACKAGE_LENGTH);
 
-    /* 记录本次接收时间，用于 100ms 无数据检测 */
     NUC.LastRxTimeUs = mcu_clock_us;
 }
 
 
 
-/// @brief 下位机发送业务包（协议 3.2，共 80 字节）
-/// @param Q 云台 IMU 四元数 q_w, q_x, q_y, q_z
+/// @brief 下位机发送业务包（协议 3.2，共 72 字节）
 void NUC_SendConfig(float Gimbal_Q[4],float Chassis_Q[4],float Robot_X_Velocity,float Robot_Y_Velocity)
 {
-    if (NUC.State != NUC_STATE_RUNNING)//只在这一状态下循环基础业务
+    if (NUC.State != NUC_STATE_RUNNING)
         return;
 
     memset(NucTxBuf, 0, NUC_TX_PACKAGE_LENGTH);
 
-    /* 0~3 帧头 + 帧内校验 */
     NucTxBuf[0] = 0xA9;
     NucTxBuf[1] = 0xC8;
     NucTxBuf[2] = 0xB3;
     NucTxBuf[3] = 0xE5;
 
-    /* 4~11 发送时刻时间戳：MCU 视角，单位 us */
-    uint64_t ts = DWT_GetTimeline_us();
-    memcpy(&NucTxBuf[4], &ts, sizeof(uint64_t));
 
-    /* 12 自瞄模式标志位
-     *   bit0~bit3 自瞄工作模式 / bit4~bit5 打击决策优先级 / bit6~bit7 己方颜色
-     *   颜色判定：RobotId 1~11 为红方，101~111 为蓝方（裁判系统离线时 RobotId=0 按红方处理）
-     *   若要在台架上固定为红方，可改用下面注释掉的一行 */
     uint8_t color = (Referee.RobotStatus.RobotId >= 100) ? NUC_COLOR_BLUE : NUC_COLOR_RED;
-    // uint8_t color = NUC_COLOR_RED;   // 测试时先默认红方
-    NucTxBuf[12] = (uint8_t)((((uint8_t)Vision.VisionMode) & NUC_VISION_MODE_MASK) << NUC_VISION_MODE_SHIFT)
-                 | (uint8_t)((((uint8_t)Vision.DecisionMode) & NUC_VISION_DECISION_MASK) << NUC_VISION_DECISION_SHIFT)
-                 | (uint8_t)(((color) & NUC_VISION_COLOR_MASK) << NUC_VISION_COLOR_SHIFT);
 
-    /* 13 帧内校验 */
-    NucTxBuf[13] = 0x55;
+    NucTxBuf[4] = (uint8_t)((((uint8_t)Vision.VisionMode) & NUC_VISION_MODE_MASK) << NUC_VISION_MODE_SHIFT)
+                | (uint8_t)((((uint8_t)Vision.DecisionMode) & NUC_VISION_DECISION_MASK) << NUC_VISION_DECISION_SHIFT)
+                | (uint8_t)(((color) & NUC_VISION_COLOR_MASK) << NUC_VISION_COLOR_SHIFT);
 
-    /* 14~29 云台 IMU 四元数 q_w, q_x, q_y, q_z */
+    NucTxBuf[5] = 0x55;
+
     if (Gimbal_Q != NULL)
     {
-        memcpy(&NucTxBuf[14], Gimbal_Q, 16);
+        memcpy(&NucTxBuf[6], Gimbal_Q, 16);
     }
 
-    /* 30 帧内校验 */
-    NucTxBuf[30] = 0x55;
+    NucTxBuf[22] = 0x55;
 
-    /* 31~34 云台 Yaw 角速度：BMI088 读出为 rad/s，协议要求 deg/s */
     {
         float yaw_rate = Inertial.Gyro[AZ] * 57.295779513f;
-        memcpy(&NucTxBuf[31], &yaw_rate, 4);
+        memcpy(&NucTxBuf[23], &yaw_rate, 4);
     }
 
-    /* 35~38 云台 Pitch 角速度 */
     {
         float pitch_rate = Inertial.Gyro[AX] * 57.295779513f;
-        memcpy(&NucTxBuf[35], &pitch_rate, 4);
+        memcpy(&NucTxBuf[27], &pitch_rate, 4);
     }
 
-    /* 39 帧内校验 */
-    NucTxBuf[39] = 0x55;
+    NucTxBuf[31] = 0x55;
 
-    /* 40~55 底盘 IMU 四元数 */
     {
-        memcpy(&NucTxBuf[40], Chassis_Q, 16);
+        memcpy(&NucTxBuf[32], Chassis_Q, 16);
     }
 
-    /* 56 帧内校验 */
-    NucTxBuf[56] = 0x55;
+    NucTxBuf[48] = 0x55;
 
-    /* 57~58 弹丸弹速：协议要求 uint16(float(原始弹速) * 1e3) */
     uint16_t bullet_speed = (uint16_t)(Referee.ShootData.InitialSpeed * 1000.0f);
-    NucTxBuf[57] = bullet_speed & 0xFF;
-    NucTxBuf[58] = (bullet_speed >> 8) & 0xFF;
+    NucTxBuf[49] = bullet_speed & 0xFF;
+    NucTxBuf[50] = (bullet_speed >> 8) & 0xFF;
 
-    /* 59 比赛状态：0x00~0x05，直接取裁判系统 GameProgress */
-    NucTxBuf[59] = Referee.GameStatus.GameProgress;
+    NucTxBuf[51] = Referee.GameStatus.GameProgress;
 
-    /* 60~61 当前机器人剩余血量 */
-    NucTxBuf[60] = Referee.RobotStatus.CurrentHP & 0xFF;
-    NucTxBuf[61] = (Referee.RobotStatus.CurrentHP >> 8) & 0xFF;
+    NucTxBuf[52] = Referee.RobotStatus.CurrentHP & 0xFF;
+    NucTxBuf[53] = (Referee.RobotStatus.CurrentHP >> 8) & 0xFF;
 
-    /* 62~63 基地血量 / 64~65 前哨站血量，按己方颜色取 */
-    uint16_t base_hp    = (color == NUC_COLOR_BLUE) ? Referee.GameRobotHP.BlueBaseHP    : Referee.GameRobotHP.RedBaseHP;
-    uint16_t outpost_hp = (color == NUC_COLOR_BLUE) ? Referee.GameRobotHP.BlueOutpostHP : Referee.GameRobotHP.RedOutpostHP;
-    NucTxBuf[62] = base_hp & 0xFF;
-    NucTxBuf[63] = (base_hp >> 8) & 0xFF;
-    NucTxBuf[64] = outpost_hp & 0xFF;
-    NucTxBuf[65] = (outpost_hp >> 8) & 0xFF;
+    NucTxBuf[54] = Referee.GameRobotHP.ally_base_HP & 0xFF;
+    NucTxBuf[55] = (Referee.GameRobotHP.ally_base_HP >> 8) & 0xFF;
+    NucTxBuf[56] = Referee.GameRobotHP.ally_outpost_HP & 0xFF;
+    NucTxBuf[57] = (Referee.GameRobotHP.ally_outpost_HP >> 8) & 0xFF;
 
-    /* 66~67 当前阶段剩余时间（秒） */
-    NucTxBuf[66] = Referee.GameStatus.StageRemainTime & 0xFF;
-    NucTxBuf[67] = (Referee.GameStatus.StageRemainTime >> 8) & 0xFF;
+    NucTxBuf[58] = Referee.GameStatus.StageRemainTime & 0xFF;
+    NucTxBuf[59] = (Referee.GameStatus.StageRemainTime >> 8) & 0xFF;
 
-    /* 68 剩余发弹量 = uint8(原始数据) */
-    NucTxBuf[68] = (uint8_t)(Referee.ProjectileAllowance.ProjectileAllowance17mm & 0xFF);
+    NucTxBuf[60] = (uint8_t)(Referee.ProjectileAllowance.ProjectileAllowance17mm & 0xFF);
 
-    /* 69 帧内校验 */
-    NucTxBuf[69] = 0x55;
+    NucTxBuf[61] = 0x55;
 
-    /* 70~73 车辆 x 方向速度 / 74~77 车辆 y 方向速度 */
     {
         float vx = 0.0f;
         float vy = 0.0f;
-        memcpy(&NucTxBuf[70], &vx, 4);
-        memcpy(&NucTxBuf[74], &vy, 4);
+        memcpy(&NucTxBuf[62], &vx, 4);
+        memcpy(&NucTxBuf[66], &vy, 4);
     }
 
-    /* 78~79 CRC16：计算 0~77 字节 */
     CRC16_Append(NucTxBuf, NUC_TX_PACKAGE_LENGTH - 2, CRC16_CCITT);
 
 	HAL_UART_Transmit(&huart1, NucTxBuf, NUC_TX_PACKAGE_LENGTH, 10);
 	CDC_Transmit_FS(NucTxBuf, NUC_TX_PACKAGE_LENGTH);
 }
 
-/// @brief 解析键鼠输入块（协议 3.1 字节 40~49，与 v5.1 的 27~36 位序一致）
+/// @brief 解析键鼠输入块（协议 3.1 字节 32~41，与 v5.1 的位序一致）
 void NUC_RC_RxCallback(void)
 {
     uint8_t *KeyBuf = &NucRxBuf[NUC_RX_KEY_BYTE_OFFSET];
@@ -293,8 +262,16 @@ void NUC_RC_RxCallback(void)
 
 void NUC_RxCallback(uint8_t *rxBuf, int rxSize)
 {
-	//如果是固定帧（协议 3.1，共 67 字节）
-	if(rxBuf[0] == 0xA9 && rxBuf[1] == 0xC8 
+	
+	if (rxBuf == NULL || rxSize < (int)NUC_SYNC_PACKAGE_LENGTH)
+	{
+		NUC.ErrorCount++;
+		return;
+	}
+
+	//如果是固定帧
+	if(rxSize >= (int)NUC_RX_PACKAGE_LENGTH
+				&& rxBuf[0] == 0xA9 && rxBuf[1] == 0xC8 
 				&& rxBuf[2] == 0xB3 && rxBuf[3] == 0xE5
 				&& rxBuf[NUC_RX_CHECK_POS_0] == NUC_RX_CHECK_VALUE
 				&& rxBuf[NUC_RX_CHECK_POS_1] == NUC_RX_CHECK_VALUE
@@ -307,11 +284,13 @@ void NUC_RxCallback(uint8_t *rxBuf, int rxSize)
 			NUC_Fixed_frame_processing();
 	}
 	
-	//如果是同步帧（协议 2.1，共 20 字节）
-	else if(rxBuf[0] == 0xAA && rxBuf[1] == 0xAA 
+	//如果是同步帧
+	else if(rxSize >= (int)NUC_SYNC_PACKAGE_LENGTH
+				&& rxBuf[0] == 0xAA && rxBuf[1] == 0xAA 
 				&& CRC16_Verify(rxBuf, NUC_SYNC_PACKAGE_LENGTH, CRC16_CCITT) == HAL_OK)
 	{
-			NUC.State = NUC_STATE_RUNNING;
+			if (NUC.State == NUC_STATE_UNSYNC)
+				NUC.State = NUC_STATE_SYNCING;
 		
 			memcpy(NucSyncRxBuf, rxBuf, NUC_SYNC_PACKAGE_LENGTH);
 			NUC_SyncPacketHandler();   //回包
@@ -324,59 +303,48 @@ void NUC_RxCallback(uint8_t *rxBuf, int rxSize)
 	}
 	
 	//重启DMA，准备接收下一帧
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuf, sizeof(NucDmaBuf));
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, NucDmaBuf, sizeof(NucDmaBuf));
   __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
  
 }
 
-/// @brief 解析上位机业务帧（协议 3.1）
+/// @brief 解析上位机业务帧
 void NUC_Fixed_frame_processing()
 {
     uint32_t NowTick = HAL_GetTick();
 	
-	  //新增时间戳检查 
-    uint64_t tx_timestamp_us;
-    memcpy(&tx_timestamp_us, &NucRxBuf[4], sizeof(uint64_t));
-    uint64_t local_us =DWT_GetTimeline_us();
-	
-    int64_t diff_us = (int64_t)local_us - (int64_t)tx_timestamp_us;
-	
+    NUC.LastRxTimeUs = DWT_GetTimeline_us();
 
-		
-		NUC.LastRxTimeUs = local_us;
-
-    /* ---------- 字节 12 云台控制标志位 ---------- */
-    NUC.YawPosValid    = (NucRxBuf[12] & NUC_GIMBAL_YAW_POS)     ? 1 : 0;
-    NUC.YawVelValid    = (NucRxBuf[12] & NUC_GIMBAL_YAW_VEL)     ? 1 : 0;
-    NUC.YawAccValid    = (NucRxBuf[12] & NUC_GIMBAL_YAW_ACC)     ? 1 : 0;
-    NUC.PitchPosValid  = (NucRxBuf[12] & NUC_GIMBAL_PITCH_POS)   ? 1 : 0;
-    NUC.PitchVelValid  = (NucRxBuf[12] & NUC_GIMBAL_PITCH_VEL)   ? 1 : 0;
-    NUC.PitchAccValid  = (NucRxBuf[12] & NUC_GIMBAL_PITCH_ACC)   ? 1 : 0;
+    NUC.YawPosValid    = (NucRxBuf[4] & NUC_GIMBAL_YAW_POS)     ? 1 : 0;
+    NUC.YawVelValid    = (NucRxBuf[4] & NUC_GIMBAL_YAW_VEL)     ? 1 : 0;
+    NUC.YawAccValid    = (NucRxBuf[4] & NUC_GIMBAL_YAW_ACC)     ? 1 : 0;
+    NUC.PitchPosValid  = (NucRxBuf[4] & NUC_GIMBAL_PITCH_POS)   ? 1 : 0;
+    NUC.PitchVelValid  = (NucRxBuf[4] & NUC_GIMBAL_PITCH_VEL)   ? 1 : 0;
+    NUC.PitchAccValid  = (NucRxBuf[4] & NUC_GIMBAL_PITCH_ACC)   ? 1 : 0;
 
 
-    /* ---------- 字节 13~36 云台控制量 ---------- */
-    Uint8ArrayToFloat32(&NUC.YawAngle,      &NucRxBuf[13]);
-    Uint8ArrayToFloat32(&NUC.YawVelocity,   &NucRxBuf[17]);
-    Uint8ArrayToFloat32(&NUC.YawAccel,      &NucRxBuf[21]);
-    Uint8ArrayToFloat32(&NUC.PitchAngle,    &NucRxBuf[25]);
-    Uint8ArrayToFloat32(&NUC.PitchVelocity, &NucRxBuf[29]);
-    Uint8ArrayToFloat32(&NUC.PitchAccel,    &NucRxBuf[33]);
+    Uint8ArrayToFloat32(&NUC.YawAngle,      &NucRxBuf[5]);
+    Uint8ArrayToFloat32(&NUC.YawVelocity,   &NucRxBuf[9]);
+    Uint8ArrayToFloat32(&NUC.YawAccel,      &NucRxBuf[13]);
+    Uint8ArrayToFloat32(&NUC.PitchAngle,    &NucRxBuf[17]);
+    Uint8ArrayToFloat32(&NUC.PitchVelocity, &NucRxBuf[21]);
+    Uint8ArrayToFloat32(&NUC.PitchAccel,    &NucRxBuf[25]);
 
-    /* ---------- 字节 38 火控标志位 ---------- */
-    NUC.IsLocked     = (NucRxBuf[38] & NUC_FIRE_LOCKED) ? 1 : 0;
-    NUC.IsFire       = (NucRxBuf[38] & NUC_FIRE_SHOOT)  ? 1 : 0;
+    NUC.FireCtrlFlag = NucRxBuf[30];
+    NUC.IsLocked     = (NucRxBuf[30] & NUC_FIRE_LOCKED) ? 1 : 0;
+    NUC.IsFire       = (NucRxBuf[30] & NUC_FIRE_SHOOT)  ? 1 : 0;
 
-    /* ---------- 字节 51~63 底盘控制 ---------- */
-    NUC.ChassisXVelValid   = (NucRxBuf[51] & NUC_CHASSIS_X_VEL)   ? 1 : 0;
-    NUC.ChassisYVelValid   = (NucRxBuf[51] & NUC_CHASSIS_Y_VEL)   ? 1 : 0;
-    NUC.ChassisYawVelValid = (NucRxBuf[51] & NUC_CHASSIS_YAW_VEL) ? 1 : 0;
+    NUC.ChassisCtrlFlag    = NucRxBuf[43];
+    NUC.ChassisXVelValid   = (NucRxBuf[43] & NUC_CHASSIS_X_VEL)   ? 1 : 0;
+    NUC.ChassisYVelValid   = (NucRxBuf[43] & NUC_CHASSIS_Y_VEL)   ? 1 : 0;
+    NUC.ChassisYawVelValid = (NucRxBuf[43] & NUC_CHASSIS_YAW_VEL) ? 1 : 0;
 
-    Uint8ArrayToFloat32(&NUC.ChassisXVelocity,   &NucRxBuf[52]);
-    Uint8ArrayToFloat32(&NUC.ChassisYVelocity,   &NucRxBuf[56]);
-    Uint8ArrayToFloat32(&NUC.ChassisYawVelocity, &NucRxBuf[60]);
+    Uint8ArrayToFloat32(&NUC.ChassisXVelocity,   &NucRxBuf[44]);
+    Uint8ArrayToFloat32(&NUC.ChassisYVelocity,   &NucRxBuf[48]);
+    Uint8ArrayToFloat32(&NUC.ChassisYawVelocity, &NucRxBuf[52]);
 
     /* ---------- 派生 v5.1 兼容视图（供现有控制链路使用） ----------
-     * v5.2 用“位置有效”位表达 v5.1 的 ANGLE_CONTROL，其余分量不下发到控制器。
+     * v5.2 起用“位置有效”位表达 v5.1 的 ANGLE_CONTROL，其余分量不下发到控制器。
      * 若需要把速度/加速度也接进控制链路，直接用上面的 YawVelocity / YawAccel 等字段。 */
 //    NUC.Yaw_ControlMode   = NUC.YawPosValid   ? ANGLE_CONTROL : 0;
 //    NUC.Pitch_ControlMode = NUC.PitchPosValid ? ANGLE_CONTROL : 0;

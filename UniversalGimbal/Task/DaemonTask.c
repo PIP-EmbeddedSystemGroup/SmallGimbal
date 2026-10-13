@@ -54,7 +54,7 @@ void DaemonTask(void const *argument)
         Daemon.CpuUsage = 100.f - (IdleCounter / 1000000.f / 0.1f * 100.f); // 1000000是定时器频率 0.1是统计周期 100是百分比
         IdleCounter = 0;
 
-				//判断是否需要切换NUC的
+				//判断是否需要切换NUC的状态
 				NUC_TimeoutCheck();
         uint32_t NowTick = HAL_GetTick();
 			
