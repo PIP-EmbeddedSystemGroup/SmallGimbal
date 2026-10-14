@@ -3,7 +3,7 @@
 <title>Static Call Graph - [UniversalGimbal\UniversalGimbal.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image UniversalGimbal\UniversalGimbal.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Tue Oct 13 23:08:23 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Oct 14 17:55:46 2026
 <BR><P>
 <H3>Maximum Stack Usage =        360 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1174,7 +1174,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[84]"></a>GimbalTask</STRONG> (Thumb, 548 bytes, Stack size 48 bytes, gimbaltask.o(i.GimbalTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 248<LI>Call Chain = GimbalTask &rArr; Gimbal_PitchPID_CalcWithConstrain &rArr; Gimbal_SpeedModeCalConstrain &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
+<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = GimbalTask &rArr; Gimbal_PitchPID_CalcWithConstrain &rArr; Gimbal_SpeedModeCalConstrain &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GM6020_Init
@@ -1198,8 +1198,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GimbalTask
 </UL>
 
-<P><STRONG><a name="[fd]"></a>Gimbal_PitchPID_CalcWithConstrain</STRONG> (Thumb, 624 bytes, Stack size 40 bytes, gimbaltask.o(i.Gimbal_PitchPID_CalcWithConstrain))
-<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = Gimbal_PitchPID_CalcWithConstrain &rArr; Gimbal_SpeedModeCalConstrain &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
+<P><STRONG><a name="[fd]"></a>Gimbal_PitchPID_CalcWithConstrain</STRONG> (Thumb, 642 bytes, Stack size 48 bytes, gimbaltask.o(i.Gimbal_PitchPID_CalcWithConstrain))
+<BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = Gimbal_PitchPID_CalcWithConstrain &rArr; Gimbal_SpeedModeCalConstrain &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_AngleCalc
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AngleDiffF
@@ -1209,7 +1209,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GimbalTask
 </UL>
 
-<P><STRONG><a name="[101]"></a>Gimbal_SpeedModeCalConstrain</STRONG> (Thumb, 402 bytes, Stack size 72 bytes, gimbaltask.o(i.Gimbal_SpeedModeCalConstrain))
+<P><STRONG><a name="[101]"></a>Gimbal_SpeedModeCalConstrain</STRONG> (Thumb, 392 bytes, Stack size 72 bytes, gimbaltask.o(i.Gimbal_SpeedModeCalConstrain))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = Gimbal_SpeedModeCalConstrain &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ConstrainF
@@ -1221,8 +1221,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Gimbal_PitchPID_CalcWithConstrain
 </UL>
 
-<P><STRONG><a name="[fc]"></a>Gimbal_YawPID_Calc</STRONG> (Thumb, 172 bytes, Stack size 16 bytes, gimbaltask.o(i.Gimbal_YawPID_Calc))
-<BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = Gimbal_YawPID_Calc &rArr; PID_AngleCalc &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
+<P><STRONG><a name="[fc]"></a>Gimbal_YawPID_Calc</STRONG> (Thumb, 160 bytes, Stack size 8 bytes, gimbaltask.o(i.Gimbal_YawPID_Calc))
+<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = Gimbal_YawPID_Calc &rArr; PID_AngleCalc &rArr; AngleDiffF &rArr; AngleWrapF &rArr; __hardfp_fmodf &rArr; _frem &rArr; __fpl_fnaninf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_AngleCalc
 <LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_Calc

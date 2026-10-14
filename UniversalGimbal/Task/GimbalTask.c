@@ -30,7 +30,7 @@ void GimbalTask(void const *argument)
     GM6020_Init(&Gimbal.Yaw.Motor, 1);
     GM6020_Init(&Gimbal.Pitch.Motor, 3);
 
-    PID_InitParam.kP = 5.52f;
+    PID_InitParam.kP = 0.5f;
     PID_InitParam.kI = 0;
     PID_InitParam.kD = 0;
     PID_InitParam.CircleResolution = 360;
@@ -41,20 +41,20 @@ void GimbalTask(void const *argument)
     PID_InitParam.IntegralBand = FLOAT_MAX_VAL;
     PID_Init(&Gimbal.Yaw.PositionPID, &PID_InitParam);
 
-    PID_InitParam.kP = 274.1;
-    PID_InitParam.kI = 15;
+    PID_InitParam.kP = 3800;
+    PID_InitParam.kI = 1000;
     PID_InitParam.kD = 0;
     PID_InitParam.MaxError = 36;
     PID_InitParam.MaxOutput = 15000;
-    PID_InitParam.I_Max = 100;
+    PID_InitParam.I_Max = 4000;
     PID_InitParam.DeadBand = 0;
     PID_InitParam.IntegralBand = FLOAT_MAX_VAL;
     PID_Init(&Gimbal.Yaw.SpeedPID, &PID_InitParam);
 
     PID_InitParam.DifferentialFreqDiv = 5;
-    PID_InitParam.kP = 5.5f;
+    PID_InitParam.kP = 0.5f;
     PID_InitParam.kI = 0;
-    PID_InitParam.kD = 0.0015f;
+    PID_InitParam.kD = 0.f;
     PID_InitParam.CircleResolution = 360;
     PID_InitParam.MaxError = 90;
     PID_InitParam.MaxOutput = 72;
@@ -63,12 +63,12 @@ void GimbalTask(void const *argument)
     PID_InitParam.IntegralBand = 0;
     PID_Init(&Gimbal.Pitch.PositionPID, &PID_InitParam);
 
-    PID_InitParam.kP = 425;
-    PID_InitParam.kI = 10;
+    PID_InitParam.kP = 1400;
+    PID_InitParam.kI = 1000;					//pitch不够硬可以优先考虑加他
     PID_InitParam.kD = 0;
     PID_InitParam.MaxError = 72;
     PID_InitParam.MaxOutput = 15000;
-    PID_InitParam.I_Max = 375;
+    PID_InitParam.I_Max = 4000;
     PID_InitParam.DeadBand = 0;
     PID_InitParam.IntegralBand = 10;
     PID_Init(&Gimbal.Pitch.SpeedPID, &PID_InitParam);
@@ -83,7 +83,7 @@ void GimbalTask(void const *argument)
     PID_InitParam.IntegralBand = FLOAT_MAX_VAL;
     PID_Init(&Gimbal_Pitch_Speed_Only, &PID_InitParam);
 		
-		PID_InitParam.kP = 75;
+		PID_InitParam.kP = 40;
     PID_InitParam.kI = 400;
     PID_InitParam.kD = 0;
     PID_InitParam.MaxError = 2000;
@@ -104,8 +104,7 @@ void GimbalTask(void const *argument)
             Gimbal_Disable();
             continue;
         }
-
-        Gimbal_YawPID_Calc();
+				Gimbal_YawPID_Calc();
         Gimbal_PitchPID_CalcWithConstrain();
         DjiMotor_CanID_0x1FF_Output();
     }
@@ -118,8 +117,7 @@ void Gimbal_YawPID_Calc(void)
 		if(NUC.YawPosValid && !NUC.YawVelValid && !NUC.YawAccValid)
 		{
 				PID_AngleCalc(&Gimbal.Yaw.PositionPID, Inertial.Yaw, NUC.YawAngle);
-				float SpeedSet = Gimbal.Yaw.PositionPID.Output;
-				PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], SpeedSet);
+				PID_Calc(&Gimbal.Yaw.SpeedPID, Inertial.Gyro[AZ], Gimbal.Yaw.PositionPID.Output);
 			  Gimbal.Yaw.Motor.Current.Set = Gimbal.Yaw.SpeedPID.Output;
 		}
 		else if(NUC.YawVelValid && !NUC.YawPosValid && !NUC.YawAccValid)
@@ -136,6 +134,9 @@ void Gimbal_PitchPID_CalcWithConstrain(void)
 {
     const int PitchTopEnc = PITCH_MAX_ENCODER;
     const int PitchBottomEnc = PITCH_MIN_ENCODER; // 云台上抬对应编码器数值增大
+		const float SPEED_LIMIT_NEAR = 100.f;      // 接近限位时的编码器阈值
+		const float SPEED_LIMIT_MAX = 100;    // 最大允许速度
+		const float SPEED_LIMIT_GAIN = 100.f;     // 速度限制增益（速度/角度差）
 
 		if(NUC.PitchPosValid && !NUC.PitchVelValid && !NUC.PitchAccValid)
 		{
@@ -173,11 +174,10 @@ void Gimbal_PitchPID_CalcWithConstrain(void)
 																												PitchTopEnc,
 																												PitchBottomEnc,
 																												Gimbal.Pitch.Motor.EncoderResolution,
-																												100,
-																												100,
-																												10);
-			
-			DebugData.Value[4] = Gimbal_Pitch_Speed_Set;
+																												SPEED_LIMIT_NEAR,
+																												SPEED_LIMIT_MAX,
+																												SPEED_LIMIT_GAIN);
+
 			PID_Calc(&Gimbal_Pitch_Speed_Only, Inertial.Gyro[AX] * 57.295779513f, Gimbal_Pitch_Speed_Set);
 			Gimbal.Pitch.Motor.Current.Set = -Gimbal_Pitch_Speed_Only.Output;
 		}
@@ -238,7 +238,5 @@ float Gimbal_SpeedModeCalConstrain(
 					speedMin=0;
 				}
     }				
-		DebugData.Value[0]=speedMax;
-		DebugData.Value[1]= speedMin;
     return ConstrainF(targetSpeed,speedMax,speedMin);
 }
